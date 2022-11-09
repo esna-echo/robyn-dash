@@ -1,33 +1,35 @@
-## Step 0: Install Dash and dependencies if needed
-
+## Install Dash and dependencies if needed
+#
 # install.packages("remotes")
 # remotes::install_github("plotly/dashR", upgrade = "always")
 
+# Load libraries
 library(dash)
 library(plotly)
 library(tidyr)
 library(dplyr)
 library(Robyn)
 
-# Change this to your Robyn outputs folder
-OutputFolder <- "~/Desktop/Robyn_202211051523_init/"
+# Initialize variables
+#
+# OutputFolder - Path to folder containing Robyn's putputs
+# CampaignData - CSV with campaign data used to generate Robyn's outputs
+# BAU - input CSV's name for "Business as usual" days. The demo CSV uses "na" by default
 
-# Change this to the input CSV's name for "Business as usual" days.
-# The demo CSV uses "na" by default
+OutputFolder <- "~/Desktop/Robyn_202211051523_init/"
+CampaignData <- "~/Desktop/dt_campaigns.csv"
 BAU <- "na"
 
-# Load InputCollect
+# Load source data
 InputCollect <- robyn_read(paste(OutputFolder,"RobynModel-inputs.json", sep = ""))$InputCollect
 
-# Load source data
-dt_campaigns <- read.csv("~/Desktop/dt_campaigns.csv") %>%
+dt_campaigns <- read.csv(CampaignData) %>%
   rename(ds = InputCollect$date_var)
 
 dt_meanspend <- dt_campaigns %>%
   select(InputCollect$paid_media_spends) %>%
   summarise_all(sum)
 
-# Load source data
 dt_models <- read.csv(paste(OutputFolder,"pareto_alldecomp_matrix.csv", sep = ""), na.strings="")
 
 dt_roi <- dt_models %>%
@@ -35,7 +37,6 @@ dt_roi <- dt_models %>%
   group_by(solID) %>%
   summarise_all(sum)
 
-# load models and metrics
 dt_clusters <- read.csv(paste(OutputFolder,"pareto_clusters.csv", sep = ""), na.strings="")
 
 dt_top = dt_clusters %>%
@@ -96,8 +97,8 @@ app %>% add_callback(
       mode = "markers",
       hovertemplate = paste(
         "<b>",dt_select$solID,"</b><br><br>",
-        "%{yaxis.title.text}: %{y:.000}<br>",
-        "%{xaxis.title.text}: %{x:.000}<br>"
+        "%{yaxis.title.text}: %{y}<br>",
+        "%{xaxis.title.text}: %{x}<br>"
       )
     ) %>% layout(
       xaxis = list(title="NRMSE"),
